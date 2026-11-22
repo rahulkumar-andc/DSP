@@ -1,0 +1,196 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.8in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textbf{DSP Practical Complete Manual}}
+\lhead{Experiments 1, 2, 3 \& 4: Theory, Derivations \& Codes}
+\rfoot{Page \thepage}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.96,0.97,0.98}
+\definecolor{headcolor}{rgb}{0.1,0.25,0.5}
+
+\lstdefinestyle{scilabstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{headcolor}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{codegray}
+}
+
+\lstset{style=scilabstyle}
+
+\begin{document}
+
+\begin{center}
+    {\Large \textbf{\textcolor{headcolor}{DIGITAL SIGNAL PROCESSING (DSP) LABORATORY}}}\\[0.2cm]
+    {\large \textbf{Complete Practical Examination Notes (Experiments 1 to 4)}}\\[0.1cm]
+    \rule{\linewidth}{0.5mm}
+\end{center}
+
+\vspace{0.2cm}
+
+% EXPERIMENT 1
+\section*{\textcolor{headcolor}{EXPERIMENT 1: Generation of Elementary Discrete-Time Sequences}}
+\subsection*{1. Aim}
+To generate and plot elementary discrete-time signals: Unit Impulse, Unit Step, Unit Ramp, and Real-Valued Exponential sequence using Scilab.
+
+\subsection*{2. Theory \& Definitions}
+\begin{itemize}
+    \item \textbf{Unit Impulse Sequence $\delta[n]$:} $\delta[n] = 1$ for $n = 0$, else $0$. Sifting property: $\sum_{k=-\infty}^{\infty} x[k]\delta[n-k] = x[n]$.
+    \item \textbf{Unit Step Sequence $u[n]$:} $u[n] = 1$ for $n \ge 0$, else $0$. Relation: $\delta[n] = u[n] - u[n-1]$.
+    \item \textbf{Unit Ramp Sequence $r[n]$:} $r[n] = n$ for $n \ge 0$, else $0$. $r[n] = n \cdot u[n]$.
+    \item \textbf{Real Exponential $x[n] = a^n u[n]$:} For $0 < a < 1$ ($a = 0.8$), decays exponentially to 0 as $n \to \infty$.
+\end{itemize}
+
+\subsection*{3. Scilab Code}
+\begin{lstlisting}[language=Scilab]
+clear; clc;
+n = -10:50;
+
+x0 = zeros(1, length(n)); x0(n == 0) = 1;
+subplot(2, 2, 1); plot2d3(n, x0); title("Unit Sample \delta[n]");
+
+x1 = ones(1, length(n)); x1(n < 0) = 0;
+subplot(2, 2, 2); plot2d3(n, x1); title("Unit Step u[n]");
+
+x2 = n; x2(n < 0) = 0;
+subplot(2, 2, 3); plot2d3(n, x2); title("Unit Ramp r[n]");
+
+x3 = (0.8).^n; x3(n < 0) = 0;
+subplot(2, 2, 4); plot2d3(n, x3); title("Exponential (0.8)^n");
+\end{lstlisting}
+
+\vspace{0.5cm}
+\hrule
+\vspace{0.5cm}
+
+% EXPERIMENT 2
+\section*{\textcolor{headcolor}{EXPERIMENT 2: Linear Convolution of Discrete-Time Sequences}}
+\subsection*{1. Aim}
+To compute and plot the linear convolution of two rectangular pulses using (A) built-in function \texttt{convol()} and (B) manual nested for-loops.
+
+\subsection*{2. Theory \& Derivation}
+\begin{itemize}
+    \item \textbf{Convolution Sum:} $y[n] = x[n] * h[n] = \sum_{k=-\infty}^{\infty} x[k] h[n - k]$.
+    \item \textbf{Output Length Rule:} If lengths are $N_1$ and $N_2$, then $N_y = N_1 + N_2 - 1$.
+    \item \textbf{Sample Calculation:} $x_0[n] = 1$ and $x_1[n] = 1$ for $-5 \le n \le 5$ (both length $N_1 = N_2 = 21$ over range $[-10, 10]$).
+    \item Total output samples: $N_y = 21 + 21 - 1 = 41$ samples.
+    \item Output index range: $ny = [(-10)+(-10) : (10)+(10)] = [-20 : 20]$.
+    \item \textbf{Peak Output at $n = 0$:} $y[0] = \sum_{k=-5}^{5} (1)(1) = 11$. Output forms a symmetric triangular waveform peaking at $11$.
+\end{itemize}
+
+\subsection*{3. Scilab Code (Part A: convol, Part B: for-loops)}
+\begin{lstlisting}[language=Scilab]
+// Part A: convol()
+clear; clc;
+n = -10:10;
+x0 = zeros(1, length(n)); x0(-5 <= n & n <= 5) = 1;
+x1 = zeros(1, length(n)); x1(-5 <= n & n <= 5) = 1;
+y = convol(x0, x1); ny = -20:20;
+subplot(2, 1, 1); plot2d3(ny, y); title("Linear Convolution via convol()");
+
+// Part B: Nested Loops
+N1 = length(x0); N2 = length(x1); Ny = N1 + N2 - 1;
+y_manual = zeros(1, Ny);
+for i = 1:N1
+    for j = 1:N2
+        y_manual(i + j - 1) = y_manual(i + j - 1) + x0(i) * x1(j);
+    end
+end
+subplot(2, 1, 2); plot2d3(ny, y_manual); title("Linear Convolution via Loops");
+\end{lstlisting}
+
+\newpage
+
+% EXPERIMENT 3
+\section*{\textcolor{headcolor}{EXPERIMENT 3: First-Order Difference Equation \& LTI Response}}
+\subsection*{1. Aim}
+To simulate the response of $y[n] = 0.8 y[n-1] + x[n]$ with $x[n] = \cos(0.5\pi n)$ and compare with analytical steady-state response $y_1[n]$.
+
+\subsection*{2. Derivations \& Calculations}
+\begin{itemize}
+    \item \textbf{Transfer Function:} $Y(z)(1 - 0.8 z^{-1}) = X(z) \implies H(z) = \frac{1}{1 - 0.8 z^{-1}}$.
+    \item \textbf{Frequency Response at $\omega_0 = 0.5\pi$:}
+    $$H(e^{j 0.5\pi}) = \frac{1}{1 - 0.8 e^{-j 0.5\pi}} = \frac{1}{1 + j0.8}$$
+    \item \textbf{Magnitude:} $|H(e^{j 0.5\pi})| = \frac{1}{\sqrt{1^2 + 0.8^2}} = \frac{1}{\sqrt{1.64}} \approx \mathbf{0.781}$.
+    \item \textbf{Phase:} $\theta = -\arctan(0.8) \approx \mathbf{-0.674\text{ rad}}$.
+    \item \textbf{Steady-State Output:} $y_1[n] = 0.781 \cos(0.5\pi n - 0.67) \implies \mathbf{y_1[n] = 0.781 \cos(0.5\pi n + 0.6)}$.
+\end{itemize}
+
+\subsection*{3. Scilab Code}
+\begin{lstlisting}[language=Scilab]
+clear; clc;
+n = 0:200; x = cos(%pi * 0.5 * n);
+y = zeros(1, length(n)); y(1) = x(1);
+for i = 2:length(n)
+    y(i) = 0.8 * y(i-1) + x(i);
+end
+subplot(2, 1, 1); plot2d3(n, y); title("Simulated Response y[n]");
+y1 = 0.781 * cos(%pi * 0.5 * n + 0.6);
+subplot(2, 1, 2); plot2d3(n, y1); title("Theoretical Steady-State Response y1[n]");
+\end{lstlisting}
+
+\vspace{0.5cm}
+\hrule
+\vspace{0.5cm}
+
+% EXPERIMENT 4
+\section*{\textcolor{headcolor}{EXPERIMENT 4: Frequency Response \& Pole-Zero Analysis of IIR System}}
+\subsection*{1. Aim}
+To compute and plot the Frequency Response (Magnitude \& Phase) and Pole-Zero Plot for $H(z) = \frac{1}{1 - 0.9 z^{-1}}$ and assess BIBO stability.
+
+\subsection*{2. Derivations \& Calculations}
+\begin{itemize}
+    \item \textbf{Poles \& Zeros:} Zero at $z = 0$, Pole at $z = 0.9$.
+    \item \textbf{Stability:} $|p| = |0.9| < 1$ (inside unit circle) $\implies$ \textbf{BIBO Stable}.
+    \item \textbf{Magnitude Derivation:}
+    $$|H(e^{j\omega})| = \frac{1}{\sqrt{(1 - 0.9\cos\omega)^2 + (0.9\sin\omega)^2}} = \mathbf{\frac{1}{\sqrt{1.81 - 1.8\cos\omega}}}$$
+    \item \textbf{Phase Derivation:} $\angle H(e^{j\omega}) = \mathbf{-\arctan\left(\frac{0.9\sin\omega}{1 - 0.9\cos\omega}\right)}$.
+    \item \textbf{Filter Classification \& Critical Frequencies:}
+    \begin{itemize}
+        \item At $\omega = 0$ (DC): $|H(e^{j0})| = \frac{1}{\sqrt{1.81 - 1.8(1)}} = \frac{1}{0.1} = \mathbf{10.0}$ (Maximum Gain).
+        \item At $\omega = \frac{\pi}{2}$ (Mid-Freq): $|H(e^{j\pi/2})| = \frac{1}{\sqrt{1.81 - 1.8(0)}} = \frac{1}{\sqrt{1.81}} \approx \mathbf{0.743}$, Phase $\angle H \approx -0.733\text{ rad}$.
+        \item At $\omega = \pi$ (High Freq): $|H(e^{j\pi})| = \frac{1}{\sqrt{1.81 - 1.8(-1)}} = \frac{1}{1.9} \approx \mathbf{0.526}$ (Minimum Gain).
+    \end{itemize}
+    Decreasing gain confirms \textbf{Low-Pass Filter (LPF)} behavior.
+\end{itemize}
+
+\subsection*{3. Scilab Code}
+\begin{lstlisting}[language=Scilab]
+clear; clc;
+w = -%pi:0.01:%pi;
+magH = 1 ./ sqrt(1.81 - 1.8 * cos(w));
+phaseH = -atan(0.9 * sin(w) ./ (1 - 0.9 * cos(w)));
+
+subplot(2, 2, 1); plot(w, magH); xtitle("Magnitude Response |H(e^jw)|", "w", "|H|");
+subplot(2, 2, 2); plot(w, phaseH); xtitle("Phase Response", "w", "Phase (rad)");
+subplot(2, 2, 3); plot(0, 0, 'bo'); plot(0.9, 0, 'rx');
+xtitle("Pole-Zero Plot", "Real", "Imag"); xgrid();
+\end{lstlisting}
+
+\end{document}

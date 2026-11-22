@@ -1,0 +1,273 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.8in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textbf{DSP Practical Lab Manual}}
+\lhead{Experiments 3 \& 4: Theory, Derivation \& Code}
+\rfoot{Page \thepage}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.96,0.97,0.98}
+\definecolor{headcolor}{rgb}{0.1,0.25,0.5}
+
+\lstdefinestyle{scilabstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{headcolor}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{codegray}
+}
+
+\lstset{style=scilabstyle}
+
+\begin{document}
+
+\begin{center}
+    {\Large \textbf{\textcolor{headcolor}{DIGITAL SIGNAL PROCESSING (DSP) LABORATORY}}}\\[0.2cm]
+    {\large \textbf{Comprehensive Practical Guide: Experiments 3 \& 4}}\\[0.1cm]
+    \rule{\linewidth}{0.5mm}
+\end{center}
+
+\vspace{0.2cm}
+
+% ==============================================================================
+% EXPERIMENT 3
+% ==============================================================================
+\section*{\textcolor{headcolor}{EXPERIMENT 3: First-Order Difference Equation \& LTI System Response}}
+
+\subsection*{1. Aim}
+To simulate the response of a first-order recursive LTI system described by a difference equation to a sinusoidal input, and compare the simulated transient/steady-state response with the theoretical analytical steady-state response.
+
+\subsection*{2. Theory}
+A causal discrete-time Linear Time-Invariant (LTI) system can be modeled using a constant-coefficient linear difference equation:
+\begin{equation}
+    y[n] - a\,y[n-1] = x[n] \implies y[n] = a\,y[n-1] + x[n]
+\end{equation}
+where $x[n]$ is the input signal, $y[n]$ is the output response, and $a$ is the system feedback coefficient ($a = 0.8$).
+When an LTI system is excited by a sinusoidal input of frequency $\omega_0$:
+\begin{equation}
+    x[n] = \cos(\omega_0 n)
+\end{equation}
+The steady-state response of the system remains a sinusoid of the exact same frequency $\omega_0$, with its amplitude scaled by the system's magnitude response $|H(e^{j\omega_0})|$ and its phase shifted by $\angle H(e^{j\omega_0})$:
+\begin{equation}
+    y_{ss}[n] = |H(e^{j\omega_0})| \cos\big(\omega_0 n + \angle H(e^{j\omega_0})\big)
+\end{equation}
+
+\subsection*{3. Mathematical Derivations \& Calculations}
+
+\paragraph{Step 1: System Transfer Function $H(z)$}
+Taking the Z-Transform on both sides of the difference equation assuming zero initial conditions:
+\begin{align}
+    \mathcal{Z}\{y[n]\} - 0.8\,\mathcal{Z}\{y[n-1]\} &= \mathcal{Z}\{x[n]\} \nonumber \\
+    Y(z) - 0.8\,z^{-1}Y(z) &= X(z) \nonumber \\
+    Y(z)(1 - 0.8\,z^{-1}) &= X(z) \nonumber \\
+    \mathbf{H(z) = \frac{Y(z)}{X(z)}} &\mathbf{= \frac{1}{1 - 0.8\,z^{-1}}}
+\end{align}
+
+\paragraph{Step 2: Frequency Response $H(e^{j\omega})$}
+Substituting $z = e^{j\omega}$:
+\begin{equation}
+    H(e^{j\omega}) = \frac{1}{1 - 0.8\,e^{-j\omega}} = \frac{1}{1 - 0.8(\cos\omega - j\sin\omega)} = \frac{1}{(1 - 0.8\cos\omega) + j(0.8\sin\omega)}
+\end{equation}
+
+\paragraph{Step 3: Evaluation at Input Frequency $\omega_0 = 0.5\pi$ rad/sample}
+Given input $x[n] = \cos(0.5\pi n)$, the frequency is $\omega_0 = \frac{\pi}{2}$.
+Since $\cos(0.5\pi) = 0$ and $\sin(0.5\pi) = 1$:
+\begin{equation}
+    H(e^{j 0.5\pi}) = \frac{1}{(1 - 0.8(0)) + j(0.8(1))} = \frac{1}{1 + j0.8}
+\end{equation}
+
+\paragraph{Step 4: Magnitude \& Phase Calculation}
+\begin{itemize}
+    \item \textbf{Magnitude $|H(e^{j 0.5\pi})|$:}
+    \begin{equation}
+        |H(e^{j 0.5\pi})| = \frac{1}{\sqrt{1^2 + (0.8)^2}} = \frac{1}{\sqrt{1 + 0.64}} = \frac{1}{\sqrt{1.64}} \approx \frac{1}{1.2806} \approx \mathbf{0.781}
+    \end{equation}
+    \item \textbf{Phase $\angle H(e^{j 0.5\pi})$:}
+    \begin{equation}
+        \theta = -\arctan\left(\frac{0.8}{1}\right) = -\arctan(0.8) \approx \mathbf{-0.674\text{ rad}} \quad (\approx -38.66^\circ)
+    \end{equation}
+\end{itemize}
+
+\paragraph{Step 5: Steady-State Theoretical Response Formula}
+\begin{equation}
+    y_1[n] = 0.781 \cos(0.5\pi n - 0.67) \quad \text{or} \quad \mathbf{y_1[n] = 0.781 \cos(0.5\pi n + 0.6)}
+\end{equation}
+
+\subsection*{4. Scilab Implementation Code}
+\begin{lstlisting}[language=Scilab]
+// Experiment 3: First-Order Difference Equation Response
+clear;
+clc;
+
+n = 0:200;
+x = cos(%pi * 0.5 * n);
+
+// Difference Equation Simulation
+y = zeros(1, length(n));
+y(1) = x(1);
+
+for i = 2:length(n)
+    y(i) = 0.8 * y(i-1) + x(i);
+end
+
+// Plot Simulated Response
+subplot(2, 1, 1);
+plot2d3(n, y);
+title("Simulated Response y[n] from Difference Equation");
+xlabel("Sample index n"); ylabel("y[n]");
+
+// Theoretical Analytical Steady-State Response
+y1 = 0.781 * cos(%pi * 0.5 * n + 0.6);
+subplot(2, 1, 2);
+plot2d3(n, y1);
+title("Theoretical Steady-State Response y1[n]");
+xlabel("Sample index n"); ylabel("y1[n]");
+\end{lstlisting}
+
+\subsection*{5. Results \& Discussion}
+\begin{enumerate}
+    \item For initial samples ($n < 20$), the simulated output $y[n]$ exhibits a transient phase due to recursive energy accumulation from initial rest.
+    \item For $n \ge 25$, the system settles into pure sinusoidal steady-state, matching the theoretical analytical output $y_1[n]$ in both amplitude ($0.781$) and frequency ($0.5\pi$).
+\end{enumerate}
+
+\newpage
+
+% ==============================================================================
+% EXPERIMENT 4
+% ==============================================================================
+\section*{\textcolor{headcolor}{EXPERIMENT 4: Frequency Response \& Pole-Zero Analysis of IIR System}}
+
+\subsection*{1. Aim}
+To compute, analyze, and plot the Frequency Response (Magnitude and Phase Response) and Pole-Zero Plot of a first-order Infinite Impulse Response (IIR) digital system, and evaluate its BIBO stability.
+
+\subsection*{2. Theory}
+The transfer function of a first-order IIR system in the Z-domain is given by:
+\begin{equation}
+    H(z) = \frac{1}{1 - 0.9\,z^{-1}} = \frac{z}{z - 0.9}
+\end{equation}
+\begin{itemize}
+    \item \textbf{Zeros:} The values of $z$ for which $H(z) = 0$.
+    \item \textbf{Poles:} The values of $z$ for which $H(z) \to \infty$.
+    \item \textbf{BIBO Stability Criterion:} A causal discrete-time LTI system is Bounded-Input Bounded-Output (BIBO) stable if and only if all poles of its transfer function lie strictly inside the unit circle of the Z-plane, i.e., $|p_k| < 1$.
+\end{itemize}
+
+\subsection*{3. Mathematical Derivations \& Calculations}
+
+\paragraph{Step 1: Pole-Zero Determination \& Stability}
+\begin{itemize}
+    \item Setting Numerator $N(z) = z = 0 \implies \mathbf{Zero\ at\ z = 0}$ (Origin).
+    \item Setting Denominator $D(z) = z - 0.9 = 0 \implies \mathbf{Pole\ at\ z = 0.9}$.
+    \item \textbf{Stability Check:} Magnitude of pole $|p| = |0.9| = 0.9 < 1.0$.
+    \item \textbf{Conclusion:} Because the pole lies strictly inside the unit circle, the system is \textbf{BIBO STABLE}.
+\end{itemize}
+
+\paragraph{Step 2: Magnitude Response Derivation}
+Substitute $z = e^{j\omega}$ into $H(z)$:
+\begin{equation}
+    H(e^{j\omega}) = \frac{1}{1 - 0.9\,e^{-j\omega}} = \frac{1}{(1 - 0.9\cos\omega) + j(0.9\sin\omega)}
+\end{equation}
+The magnitude $|H(e^{j\omega})|$ is given by:
+\begin{equation}
+    |H(e^{j\omega})| = \frac{1}{\sqrt{(1 - 0.9\cos\omega)^2 + (0.9\sin\omega)^2}}
+\end{equation}
+Expanding the terms inside the square root:
+\begin{align}
+    (1 - 0.9\cos\omega)^2 + (0.9\sin\omega)^2 &= 1 - 1.8\cos\omega + 0.81\cos^2\omega + 0.81\sin^2\omega \nonumber \\
+    &= 1 - 1.8\cos\omega + 0.81(\cos^2\omega + \sin^2\omega) \nonumber \\
+    &= 1 + 0.81 - 1.8\cos\omega \quad (\text{since } \cos^2\omega + \sin^2\omega = 1) \nonumber \\
+    &= \mathbf{1.81 - 1.8\cos\omega}
+\end{align}
+Thus, the magnitude response is:
+\begin{equation}
+    \mathbf{|H(e^{j\omega})| = \frac{1}{\sqrt{1.81 - 1.8\cos\omega}}}
+\end{equation}
+
+\paragraph{Step 3: Phase Response Derivation}
+For a complex fraction $\frac{1}{A + jB}$, the phase is $-\arctan\left(\frac{B}{A}\right)$:
+\begin{equation}
+    \mathbf{\angle H(e^{j\omega}) = -\arctan\left(\frac{0.9\sin\omega}{1 - 0.9\cos\omega}\right)}
+\end{equation}
+
+\paragraph{Step 4: Boundary \& Intermediate Frequency Analysis}
+\begin{center}
+\begin{tabular}{@{}llcl@{}}
+\toprule
+\textbf{Frequency ($\omega$)} & \textbf{Calculation} & \textbf{Value $|H(e^{j\omega})|$} & \textbf{Filter Behavior} \\
+\midrule
+$\omega = 0$ (DC / Low Freq)    & $\frac{1}{\sqrt{1.81 - 1.8(1)}} = \frac{1}{\sqrt{0.01}} = \frac{1}{0.1}$     & \textbf{10.0}    & Maximum Gain (Passband) \\
+$\omega = \frac{\pi}{2}$ (Mid-Freq) & $\frac{1}{\sqrt{1.81 - 1.8(0)}} = \frac{1}{\sqrt{1.81}} \approx \frac{1}{1.345}$ & \textbf{$\approx 0.743$} & Intermediate Attenuation \\
+$\omega = \pi$ (High Freq)      & $\frac{1}{\sqrt{1.81 - 1.8(-1)}} = \frac{1}{\sqrt{3.61}} = \frac{1}{1.9}$    & \textbf{$\approx 0.526$} & Minimum Gain (Stopband) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\textbf{Phase at $\omega = \frac{\pi}{2}$:}
+\begin{equation}
+    \angle H\left(e^{j\frac{\pi}{2}}\right) = -\arctan\left(\frac{0.9\sin(\pi/2)}{1 - 0.9\cos(\pi/2)}\right) = -\arctan\left(\frac{0.9}{1}\right) \approx \mathbf{-0.733\text{ rad}} \quad (\approx -42^\circ)
+\end{equation}
+\textbf{Interpretation:} The system exhibits high gain at low frequencies ($\omega=0$), smooth monotonic reduction at $\omega=\frac{\pi}{2}$, and heavy attenuation at high frequencies ($\omega=\pi$), proving it functions as a \textbf{Low-Pass Filter (LPF)}.
+
+\subsection*{4. Scilab Implementation Code}
+\begin{lstlisting}[language=Scilab]
+// Experiment 4: Frequency Response & Pole-Zero Plot
+clear;
+clc;
+
+// Frequency range
+w = -%pi:0.01:%pi;
+
+// Magnitude response
+magH = 1 ./ sqrt(1.81 - 1.8 * cos(w));
+
+// Phase response
+phaseH = -atan(0.9 * sin(w) ./ (1 - 0.9 * cos(w)));
+
+// Subplot 1: Magnitude Response
+subplot(2, 2, 1);
+plot(w, magH);
+xtitle("Magnitude Response", "Frequency \omega (rad/sample)", "|H(e^j\omega)|");
+
+// Subplot 2: Phase Response
+subplot(2, 2, 2);
+plot(w, phaseH);
+xtitle("Phase Response", "Frequency \omega (rad/sample)", "Phase (rad)");
+
+// Subplot 3: Pole-Zero Plot
+subplot(2, 2, 3);
+plot(0, 0, 'bo');     // Zero at origin (0,0) as blue circle
+plot(0.9, 0, 'rx');   // Pole at (0.9,0) as red cross
+xtitle("Pole-Zero Plot (Stable System)", "Real Axis", "Imaginary Axis");
+xgrid();
+\end{lstlisting}
+
+\subsection*{5. Results \& Conclusion}
+\begin{enumerate}
+    \item The system has a zero at $z = 0$ and a pole at $z = 0.9$. Because $|0.9| < 1$, the system is confirmed to be BIBO stable.
+    \item The magnitude response reaches a maximum of $10$ at $\omega = 0$ and decreases monotonically to $0.526$ at $\omega = \pm\pi$, confirming Low-Pass Filter (LPF) characteristics.
+\end{enumerate}
+
+\end{document}
